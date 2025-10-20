@@ -1,0 +1,230 @@
+import io
+import aiohttp
+import discord
+from discord.ext import commands
+from urllib.parse import quote_plus
+
+# ---------------- CONFIG ----------------
+TOKEN = ""
+PREFIX = "!"
+PASSWORD = "YOUR_PASSWORD_HASH_HERE"  # Pass dùng cho change_name
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+
+# ---------------- EVENTS ----------------
+@bot.event
+async def on_ready():
+    print(f"✅ Bot {bot.user} đã đăng nhập thành công!")
+
+# ---------------- LỆNH INFO ----------------
+@bot.command()
+async def info(ctx, uid: str):
+    wait_msg = await ctx.send(f"⏳ Đang tải dữ liệu UID `{uid}`...")
+
+    info_api = f"https://huutri.id.vn/api/freefire/info?uid={uid}"
+    banner_api = f"http://212.227.65.132:13521/bnr?uid={uid}&key=AlliFF_BOT_V1"
+    outfit_api = f"https://danger-outfit-info.vercel.app/outfit-image?uid={uid}&key=DANGER-OUTFIT"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(info_api) as resp:
+            try:
+                info_json = await resp.json()
+            except:
+                info_json = {"error": f"Không đọc được JSON ({resp.status})"}
+
+        async with session.get(banner_api) as resp:
+            avatar_data = await resp.read()
+
+        async with session.get(outfit_api) as resp:
+            outfit_data = await resp.read()
+
+    embed = discord.Embed(
+        title=f"🧩 Info UID {uid}",
+        description="JSON gốc:",
+        color=discord.Color.blurple()
+    )
+
+    for k, v in info_json.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    files = []
+    if avatar_data and len(avatar_data) > 100:
+        files.append(discord.File(io.BytesIO(avatar_data), filename=f"{uid}_avatar.png"))
+        embed.set_thumbnail(url=f"attachment://{uid}_avatar.png")
+    if outfit_data and len(outfit_data) > 100:
+        files.append(discord.File(io.BytesIO(outfit_data), filename=f"{uid}_outfit.png"))
+        embed.set_image(url=f"attachment://{uid}_outfit.png")
+
+    await wait_msg.edit(content=None, embed=embed, attachments=files)
+
+# ---------------- LỆNH LIKE ----------------
+@bot.command()
+async def like(ctx, uid: str):
+    wait_msg = await ctx.send(f"⏳ Đang gửi like đến UID `{uid}`...")
+
+    url = f"https://ff.mlbbai.com/like/?key=emon&uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(
+        title=f"❤️ Like UID {uid}",
+        description="JSON gốc từ API like:",
+        color=discord.Color.red()
+    )
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH CHECKBAN ----------------
+@bot.command()
+async def checkban(ctx, uid: str):
+    wait_msg = await ctx.send(f"🔍 Đang kiểm tra UID `{uid}`...")
+
+    api = f"http://87.106.82.84:13522/check?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(api) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(
+        title=f"🚫 Check Ban UID {uid}",
+        description="JSON gốc từ API check ban:",
+        color=discord.Color.orange()
+    )
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH VISIT ----------------
+@bot.command()
+async def visit(ctx, uid: str):
+    wait_msg = await ctx.send(f"⏳ Đang gửi visit cho UID `{uid}`...")
+
+    url = f"https://api-visit-alliff-v2.vercel.app/visit?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(
+        title=f"🚀 Visit UID {uid}",
+        description="JSON gốc từ API visit:",
+        color=discord.Color.green()
+    )
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH CHECK REGION ----------------
+@bot.command()
+async def check(ctx, uid: str):
+    wait_msg = await ctx.send(f"🌍 Đang kiểm tra region UID `{uid}`...")
+
+    api = f"https://regionx-kappa.vercel.app/region?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(api) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(
+        title=f"🌎 Region UID {uid}",
+        description="Kết quả từ API regionx:",
+        color=discord.Color.blue()
+    )
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH CHANGE NAME ----------------
+@bot.command()
+async def change_name(ctx, uid: str, *, new_name: str):
+    try:
+        await ctx.message.delete()
+    except:
+        pass
+
+    wait_msg = await ctx.send(f"⏳ Đang đổi tên UID `{uid}` sang `{new_name}`...")
+
+    base_api = "https://danger-change-nickname.vercel.app/change-name"
+    nick_encoded = quote_plus(new_name)
+    url = f"{base_api}?nickname={nick_encoded}&uid={uid}&password={PASSWORD}"
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url) as resp:
+                try:
+                    data = await resp.json()
+                except:
+                    text = await resp.text()
+                    data = {"error": f"Không đọc được JSON ({resp.status})", "raw": text}
+        except Exception as e:
+            return await wait_msg.edit(content=f"❌ Lỗi khi gọi API: {e}")
+
+    status = data.get("status") or ("success" if data.get("success") else "error")
+    message = data.get("message") or data.get("error") or data.get("raw") or str(data)
+
+    embed = discord.Embed(
+        title="✏️ Thay đổi tên",
+        color=discord.Color.purple()
+    )
+    embed.add_field(name="UID", value=str(uid), inline=True)
+    embed.add_field(name="Kết quả", value=str(status), inline=True)
+    embed.add_field(name="Ghi chú", value=str(message), inline=False)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH SPAM REQUESTS ----------------
+@bot.command()
+async def spam(ctx, uid: str):
+    """Gửi spam requests đến UID"""
+    wait_msg = await ctx.send(f"⚙️ Đang gửi spam request đến UID `{uid}`...")
+
+    url = f"https://spam-api-nine.vercel.app/send_requests?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                data = await resp.json()
+            except:
+                text = await resp.text()
+                data = {"error": f"Không đọc được JSON ({resp.status})", "raw": text}
+
+    embed = discord.Embed(
+        title=f"🌀 Spam Requests UID {uid}",
+        description="Kết quả từ API spam:",
+        color=discord.Color.dark_gray()
+    )
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- RUN BOT ----------------
+bot.run(TOKEN)
