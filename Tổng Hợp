@@ -1,0 +1,218 @@
+import io
+import aiohttp
+import discord
+from discord.ext import commands
+
+# ---------------- CONFIG ----------------
+TOKEN = ""  # 🔹 Token bot
+PREFIX = "!"
+ADMIN_IDS = [1417356211594072084]  # 🔹 ID Discord có quyền buff vô hạn
+
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+
+like_usage = {}
+
+# ---------------- EVENTS ----------------
+@bot.event
+async def on_ready():
+    print(f"✅ Bot {bot.user} đã đăng nhập thành công!")
+
+# ---------------- LỆNH INFO ----------------
+@bot.command()
+async def info(ctx, uid: str):
+    wait_msg = await ctx.send(f"⏳ Đang tải dữ liệu UID `{uid}`...")
+    info_api = f"https://huutri.id.vn/api/freefire/info?uid={uid}"
+    banner_api = f"http://212.227.65.132:13521/bnr?uid={uid}&key=AlliFF_BOT_V1"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(info_api) as resp:
+            try:
+                info_json = await resp.json()
+            except:
+                info_json = {"error": f"Không đọc được JSON ({resp.status})"}
+
+        async with session.get(banner_api) as resp:
+            avatar_data = await resp.read()
+
+    embed = discord.Embed(title=f"🧩 Info UID {uid}", color=discord.Color.blurple())
+    for k, v in info_json.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+
+    files = []
+    if avatar_data and len(avatar_data) > 100:
+        files.append(discord.File(io.BytesIO(avatar_data), filename=f"{uid}_avatar.png"))
+        embed.set_thumbnail(url=f"attachment://{uid}_avatar.png")
+
+    await wait_msg.edit(content=None, embed=embed, attachments=files)
+
+# ---------------- LỆNH LIKE (VN) ----------------
+@bot.command()
+async def like(ctx, uid: str):
+    user_id = ctx.author.id
+    if user_id not in ADMIN_IDS:
+        like_usage[user_id] = like_usage.get(user_id, 0)
+        if like_usage[user_id] >= 3:
+            return await ctx.reply("❌ Bạn đã dùng hết 3 lượt `!like` hôm nay!")
+
+    wait_msg = await ctx.send(f"⏳ Đang gửi like đến UID `{uid}` (VN)...")
+    url = f"https://ff.mlbbai.com/like/?key=emon&uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                data = await resp.json()
+            except:
+                text = await resp.text()
+                data = {"error": f"Không đọc được JSON ({resp.status})", "raw": text}
+
+    if user_id not in ADMIN_IDS:
+        like_usage[user_id] += 1
+
+    embed = discord.Embed(title=f"❤️ LIKE (VN)", description=f"UID `{uid}`", color=discord.Color.red())
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+
+    embed.add_field(name="📦 JSON gốc", value=f"```json\n{data}\n```", inline=False)
+
+    footer = "Admin (buff vô hạn)" if user_id in ADMIN_IDS else f"Đã dùng {like_usage[user_id]}/3 lượt"
+    embed.set_footer(text=f"Dev: Sikibidi 🚀 | {footer}")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH LIKE3 (IND 🇮🇳) ----------------
+@bot.command()
+async def like3(ctx, uid: str, server_name: str = "ind"):
+    wait_msg = await ctx.send(f"🇮🇳 Đang gửi like3 đến UID `{uid}` (server: {server_name.upper()})...")
+    url = f"http://69.62.118.156:19126/like?uid={uid}&server_name={server_name}&key=freeapi"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                data = await resp.json()
+            except:
+                text = await resp.text()
+                data = {"error": f"Không đọc được JSON ({resp.status})", "raw": text}
+
+    embed = discord.Embed(
+        title=f"❤️ LIKE3 (Server IND 🇮🇳)",
+        description=f"Kết quả gửi like cho UID `{uid}`:",
+        color=discord.Color.gold()
+    )
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.add_field(name="📦 JSON gốc", value=f"```json\n{data}\n```", inline=False)
+    embed.set_footer(text="Dev: Sikibidi 🚀 | API: Ấn Độ (IND)")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH CHECKBAN ----------------
+@bot.command()
+async def checkban(ctx, uid: str):
+    wait_msg = await ctx.send(f"🔍 Đang kiểm tra UID `{uid}`...")
+    api = f"https://team-ujjaiwal.vercel.app/api/player/check-ban?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(api) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(title=f"🚫 Check Ban UID {uid}", color=discord.Color.orange())
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH VISIT ----------------
+@bot.command()
+async def visit(ctx, uid: str):
+    wait_msg = await ctx.send(f"⏳ Đang gửi visit cho UID `{uid}`...")
+    url = f"https://api-visit-alliff-v2.vercel.app/visit?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(title=f"🚀 Visit UID {uid}", color=discord.Color.green())
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH CHECK REGION ----------------
+@bot.command()
+async def check(ctx, uid: str):
+    wait_msg = await ctx.send(f"🌍 Đang kiểm tra region UID `{uid}`...")
+    api = f"https://regionx-kappa.vercel.app/region?uid={uid}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(api) as resp:
+            try:
+                data = await resp.json()
+            except:
+                data = {"error": f"Không đọc được JSON ({resp.status})"}
+
+    embed = discord.Embed(title=f"🌎 Region UID {uid}", color=discord.Color.blue())
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH JOIN TEAM2 ----------------
+@bot.command()
+async def join_team2(ctx, uid: str, emote_id: str, team_code: str):
+    wait_msg = await ctx.send(f"🎯 Đang join team `{team_code}` cho UID `{uid}` với emote `{emote_id}`...")
+    url = f"http://104.234.236.62:30151/join?uid1={uid}&emote_id={emote_id}&tc={team_code}"
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url) as resp:
+                try:
+                    data = await resp.json()
+                except:
+                    text = await resp.text()
+                    data = {"error": f"Không đọc được JSON ({resp.status})", "raw": text}
+        except Exception as e:
+            return await wait_msg.edit(content=f"❌ Lỗi khi gọi API 2: {e}")
+
+    embed = discord.Embed(title=f"🕺 Join Team `{team_code}` (API 2)", color=discord.Color.teal())
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- LỆNH JOIN3 (API JNL Dance Pro) ----------------
+@bot.command()
+async def join3(ctx, uid1: str, uid2: str, emote_id: str, team_code: str):
+    """
+    Lệnh: !join3 <uid1> <uid2> <emote_id> <team_code>
+    """
+    wait_msg = await ctx.send(f"💃 Đang thực hiện JOIN3 team `{team_code}`...")
+
+    url = f"https://jnl-dance-pro.onrender.com/join?tc={team_code}&uid1={uid1}&uid2={uid2}&uid3={uid2}&emote_id={emote_id}"
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url) as resp:
+                try:
+                    data = await resp.json()
+                except:
+                    text = await resp.text()
+                    data = {"error": f"Không đọc được JSON ({resp.status})", "raw": text}
+        except Exception as e:
+            return await wait_msg.edit(content=f"❌ Lỗi API JOIN3: {e}")
+
+    embed = discord.Embed(title=f"🪩 JOIN3 Team `{team_code}`", color=discord.Color.purple())
+    for k, v in data.items():
+        embed.add_field(name=str(k), value=str(v), inline=True)
+    embed.set_footer(text="Dev: Sikibidi 🚀 | API: JNL Dance Pro")
+    await wait_msg.edit(content=None, embed=embed)
+
+# ---------------- RUN BOT ----------------
+bot.run(TOKEN)
