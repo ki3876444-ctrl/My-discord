@@ -1,0 +1,61 @@
+body {
+    margin:0;
+    padding:0;
+    font-family: Arial, sans-serif;
+    background: url('../gifs/tumblr_1d630f6c1cc1060d4508b364d7478c12_96bc866c_540.gif') center/cover no-repeat fixed;
+    color:white;
+}
+
+/* LOGIN BOX */
+#loginBox {
+    width: 85%;
+    max-width: 350px;
+    margin: 90px auto;
+    padding: 18px;
+    text-align: center;
+    border-radius: 15px;
+    background: url("../gifs/d66a1f1b2b3bfe7dffba1a8802402796.gif");
+    background-size: cover;
+    background-position: center;
+    border: 8px solid transparent;
+    border-image: url("../gifs/9Z0EOC.gif") 30 round;
+    animation: borderRun 4s linear infinite;
+}
+
+/* MENU BOX */
+#menu { padding:20px; }
+.menuBox {
+    background: url("../gifs/hinh-anh-gif-thanh-pho-hien-dai.gif") center/cover no-repeat;
+    padding: 15px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    border: 6px solid transparent;
+    border-image: url("../gifs/9Z0EOC.gif") 30 round;
+    animation: borderRun 4s linear infinite;
+}
+.menuBox h3 { margin:0 0 10px 0; color:#00e1ff; }
+
+.output {
+    margin-top:10px;
+    padding:10px;
+    background: rgba(0,0,0,0.4);
+    border-radius:6px;
+}
+
+input, button {
+    width: 95%;
+    padding:10px;
+    margin-top:8px;
+    border-radius:6px;
+    border:none;
+}
+button { background:#0066ff; color:white; font-weight:bold; font-size:16px; }
+
+/* VIỀN CHẠY */
+@keyframes borderRun { from {border-image-slice:10;} to {border-image-slice:40;} }
+
+/* CHỮ NỔI */
+.glowText {
+    color:#00ffff;
+    text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
+}
