@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiKiBiDi Login</title>
+<link rel="stylesheet" href="../menu/style.css">
+</head>
+<body>
+
+<div id="loginBox">
+    <h2 class="glowText">Đăng Nhập Hệ Thống</h2>
+    <input id="user" type="text" placeholder="Tên đăng nhập">
+    <input id="pass" type="password" placeholder="Mật khẩu">
+    <button onclick="login()">Đăng Nhập</button>
+    <p id="loginMsg"></p>
+</div>
+
+</body>
+<script>
+function login(){
+    let u=document.getElementById("user").value;
+    let p=document.getElementById("pass").value;
+    if(u==="Sikibidi" && p==="sikibidi888"){
+        window.location.href="../menu/index.html";
+    }else{
+        document.getElementById("loginMsg").innerText="Sai tài khoản hoặc mật khẩu ❌";
+    }
+}
+</script>
+</html>
