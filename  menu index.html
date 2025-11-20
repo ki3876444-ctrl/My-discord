@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiKiBiDi Menu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="menu">
+
+    <div class="menuBox">
+        <h3 class="glowText">Check Ban UID</h3>
+        <input id="banUID" placeholder="Nhập UID">
+        <button onclick="checkBan()">Kiểm Tra</button>
+        <div id="banResult" class="output"></div>
+    </div>
+
+    <div class="menuBox">
+        <h3 class="glowText">Khôi Phục Email</h3>
+        <input id="emailInput" placeholder="Nhập Email">
+        <button onclick="sendEmail()">Gửi</button>
+        <div id="emailResult" class="output"></div>
+    </div>
+
+    <div class="menuBox">
+        <h3 class="glowText">Tham Gia Quân Đoàn</h3>
+        <input id="clanID" placeholder="UID Quân Đoàn">
+        <input id="tokenID" placeholder="Token của bạn">
+        <button onclick="joinClan()">Tham Gia</button>
+        <div id="clanResult" class="output"></div>
+    </div>
+
+    <div class="menuBox">
+        <h3 class="glowText">Cập Nhật Bio</h3>
+        <input id="bioInput" placeholder="Nhập Bio mới">
+        <input id="accessToken" placeholder="Access Token">
+        <button onclick="updateBio()">Cập Nhật</button>
+        <div id="bioResult" class="output"></div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
